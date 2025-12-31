@@ -1,5 +1,6 @@
-import java.io.File;
+import java.io.*;
 import java.time.LocalDate;
+import java.util.*;
 import java.util.*;
 
 public class JournalPage{
@@ -34,7 +35,8 @@ public class JournalPage{
     
     //helper method to check if a file exists for that date
     public boolean doesJournalExist(LocalDate date){
-        String path = "./journals/"+ user.getEmail() + "/" + date + ".txt";
+        String username = user.getDisplayName();
+        String path = "user_journal/" + username + "/" + date + ".txt";
         File file = new File(path);
         return file.exists();
     }
@@ -64,11 +66,52 @@ public class JournalPage{
     }
 
     public void createJournal(LocalDate date) {
+        try {
+            // Get the directory path and ensure it exists
+            String directoryPath = directoryPath();
+            
+            // Create the file with the date as the filename
+            String filePath = directoryPath + "/" + date + ".txt";
+            PrintWriter writer = new PrintWriter(new FileWriter(filePath));
+            writer.println("Journal created for " + date);
+            writer.close();
+            System.out.println("Journal saved successfully to " + filePath);
+        } catch (IOException e) {
+            System.out.println("Error creating journal: " + e.getMessage());
+        }
     }
 
     public void viewJournal(LocalDate date) {
     }
 
     public void editJournal(LocalDate date) {
+        try {
+            Scanner scan = new Scanner(System.in);
+            // Get the directory path and ensure it exists
+            String directoryPath = directoryPath();
+            
+            String filePath = directoryPath + "/" + date + ".txt";
+            PrintWriter writer = new PrintWriter(new FileWriter(filePath),true);
+            String input = scan.nextLine();
+            writer.println(input);
+            scan.close();
+            writer.close();
+        } catch (IOException e) {
+            System.out.println("Error editing journal: " + e.getMessage());
+        }
+    }
+    
+    public String directoryPath(){
+        // Create the directory path: user_journal/[username]/
+        String username = user.getDisplayName();
+        String directoryPath = "user_journal/" + username;
+        File directory = new File(directoryPath);
+        
+        // Create the directory if it doesn't exist
+        if (!directory.exists()) {
+            directory.mkdirs();
+        }
+        
+        return directoryPath;
     }
 }
