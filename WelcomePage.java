@@ -32,13 +32,13 @@ public class WelcomePage {
         String choice = sc.nextLine();
         
         switch(choice){
-            case 1 -> {
+            case "1" -> {
                 //link to journal page
-            }case 2 -> {
+            }case "2" -> {
                 //??
-            }case 3 -> {
+            }case "3" -> {
                 //??
-            }case 0 -> {
+            }case "0" -> {
                 //exit ide
             }default ->{
                 //error message
