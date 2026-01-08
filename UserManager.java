@@ -45,7 +45,7 @@ public class UserManager {
         ArrayList<User> users = loadUsers();
 
         for (User user : users) {
-            if (user.getEmail().equals(email) && user.getPassword().equals(password)) {
+            if (user.getEmail().equals(email) && user.getPassword().equals(SecurityUtility.encrypt(password))) {
                 return user;
             }
         }
@@ -64,9 +64,11 @@ public class UserManager {
         }
 
         try (PrintWriter writer = new PrintWriter(new FileWriter(FILE_NAME, true))) {
+            String encryptedPassword = SecurityUtility.encrypt(newUser.getPassword());
             writer.println(newUser.getEmail());
             writer.println(newUser.getDisplayName());
-            writer.println(newUser.getPassword());
+            writer.println(encryptedPassword);
+            writer.println(); // Blank line between users
             return true;
         } catch (IOException e) {
             System.out.println("Error registering user: " + e.getMessage());
