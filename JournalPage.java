@@ -1,7 +1,6 @@
 import java.io.*;
 import java.time.LocalDate;
 import java.util.*;
-import java.util.*;
 
 public class JournalPage{
     private User user;
@@ -82,7 +81,31 @@ public class JournalPage{
     }
 
     public void viewJournal(LocalDate date) {
+
+         String directoryPath = directoryPath();
+        String filePath = directoryPath + "/" + date + ".txt";
+
+
+       try {
+        BufferedReader inputStream = new BufferedReader (new FileReader(filePath));
+        System.out.println("----------------------------------------");
+        Scanner scanner = new Scanner(inputStream);
+
+        while (scanner.hasNextLine()) {
+                System.out.println(scanner.nextLine());
+            }
+
+        System.out.println("----------------------------------------");
+         System.out.println("Do you want to delete all the journal content?\n1. Yes\n2. No");
+        inputStream.close();
+        } catch (FileNotFoundException e) {
+        System.out.println("File was not found");  
+        } catch (IOException e) {
+        System.out.println("Problem reading the file");
+        }
+
     }
+
 
     public void editJournal(LocalDate date) {
         try {
@@ -91,10 +114,13 @@ public class JournalPage{
             String directoryPath = directoryPath();
             
             String filePath = directoryPath + "/" + date + ".txt";
-            PrintWriter writer = new PrintWriter(new FileWriter(filePath),true);
+            System.out.println("----------------------------------------");
+            PrintWriter writer = new PrintWriter(new FileWriter(new File(filePath), true));
             String input = scan.nextLine();
             writer.println(input);
             scan.close();
+            System.out.println("----------------------------------------");
+            System.out.println("Do you want to delete all the journal content?\n1. Yes\n2. No");
             writer.close();
         } catch (IOException e) {
             System.out.println("Error editing journal: " + e.getMessage());
