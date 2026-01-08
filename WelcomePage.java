@@ -17,3 +17,4 @@ public class WelcomePage {
         System.out.println("0. Exit                (press 0)");
     }
 }
+
