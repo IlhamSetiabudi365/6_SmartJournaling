@@ -18,48 +18,48 @@ public class UserAccountLogin {
         // Switch case for user choice
         switch (choice) {
             // Login process
-            case 1: System.out.println("Login selected.");
+            case 1: System.out.println("\nLogin selected.");
                     // Enter email
-                    System.out.print("Enter Email Address: ");
+                    System.out.print("\nEnter Email Address: ");
                     String email = scanner.nextLine();
                     // Enter password
-                    System.out.print("Enter Password: ");
+                    System.out.print("\nEnter Password: ");
                     String password = scanner.nextLine();
 
                     // Authenticate user using the entered email and password
                     User user = UserManager.login(email, password);
                     if (user != null) {
-                        System.out.println("Login successful! Welcome, " + user.getDisplayName() + ".");
+                        System.out.println("\nLogin successful! Welcome, " + user.getDisplayName() + ".");
                         running = false;
                     } else {
-                        System.out.println("Login failed! Invalid email or password.");
+                        System.out.println("\nLogin failed! Invalid email or password.");
                     }
                     break;
 
             // Registration process
-            case 2: System.out.println("Register selected.");
+            case 2: System.out.println("\nRegister selected.");
                     // Enter display name
                     System.out.print("Enter A Display Name: ");
                     String newDisplayName = scanner.nextLine();
                     // Enter email
-                    System.out.print("Enter An Email Address: ");
+                    System.out.print("\nEnter An Email Address: ");
                     String newEmail = scanner.nextLine();
                     // Enter password
-                    System.out.print("Enter A Password: ");
+                    System.out.print("\nEnter A Password: ");
                     String newPassword = scanner.nextLine();
 
                     // Create new user using the registration details entered by the user
                     User newUser = new User(newEmail, newDisplayName, newPassword);
                     if (UserManager.register(newUser)) {
-                        System.out.println("Registration successful! You can now log in.");
+                        System.out.println("\nRegistration successful! You can now log in.");
                     } else {
-                        System.out.println("Registration failed! Email may already be in use.");
+                        System.out.println("\nRegistration failed! Email may already be in use.");
                     }
                     break;
 
             // Exit process
-            case 3: System.out.println("Thank you for using Smart Journal!");
-                    System.out.println("Exiting...");
+            case 3: System.out.println("\nThank you for using Smart Journal!");
+                    System.out.println("\nExiting...");
                     running = false;
                     break;
 

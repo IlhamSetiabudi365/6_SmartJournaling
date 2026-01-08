@@ -26,6 +26,7 @@ public class UserManager {
 
             while (scanner.hasNextLine()) {
                 String email = scanner.nextLine().trim();
+                if(email.isEmpty()) continue;
                 if (!scanner.hasNextLine()) break;
                 String displayName = scanner.nextLine().trim();
                 if (!scanner.hasNextLine()) break;

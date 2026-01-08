@@ -33,5 +33,5 @@ public class UserData {
         } catch (IOException e) {
             System.out.println("Error creating UserData.txt: " + e.getMessage());
         }
-    }   
+    }
 }
