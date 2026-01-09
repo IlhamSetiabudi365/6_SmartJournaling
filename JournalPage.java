@@ -1,7 +1,6 @@
 import java.io.*;
 import java.time.LocalDate;
 import java.util.*;
-import java.util.*;
 
 public class JournalPage{
     private User user;
@@ -15,7 +14,7 @@ public class JournalPage{
         //get date today
         LocalDate today = LocalDate.now();
 
-        //calculate and diplay dates from 4 days ago up to and including today
+        //calculate and display dates from 4 days ago up to and including today
         System.out.println("=== Journal Dates ===");
         for(int i=4 , j=1 ; i>=0 ; i-- , j++){
             LocalDate dateToShow = today.minusDays(i);
