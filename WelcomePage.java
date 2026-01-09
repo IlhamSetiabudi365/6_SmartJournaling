@@ -29,16 +29,16 @@ public class WelcomePage {
         System.out.println("0. Exit                (press 0)");
 
         System.out.print(">> ");
-        String choice = sc.nextLine();
+        int choice = sc.nextLine();
         
         switch(choice){
-            case "1" -> {
+            case 1 -> {
                 //link to journal page
-            }case "2" -> {
+            }case 2 -> {
                 //??
-            }case "3" -> {
+            }case 3 -> {
                 //??
-            }case "0" -> {
+            }case 0 -> {
                 //exit ide
             }default ->{
                 //error message
