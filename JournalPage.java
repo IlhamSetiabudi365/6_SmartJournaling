@@ -38,7 +38,7 @@ public class JournalPage{
 
         //prompt user
         System.out.print("\nSelect a date to view journal, or create a new journal for today: \n>");
-         try {
+        try {
             int choice = sc.nextInt();
             if (choice == 0) return; // Returns to Welcome/Main Page
 
@@ -187,7 +187,7 @@ public class JournalPage{
         return directoryPath;
     } 
 
-     public void deleteJournal(LocalDate date) {
+    public void deleteJournal(LocalDate date) {
         String filePath = directoryPath() + "/" + date + ".txt";
         File file = new File(filePath);
         if (file.delete()) {
