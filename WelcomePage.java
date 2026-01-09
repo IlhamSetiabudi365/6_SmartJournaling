@@ -29,7 +29,7 @@ public class WelcomePage {
         System.out.println("0. Exit                (press 0)");
 
         System.out.print(">> ");
-        int choice = sc.nextLine();
+        int choice = sc.nextInt();
         
         switch(choice){
             case 1 -> {
