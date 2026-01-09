@@ -11,12 +11,15 @@ import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import javafx.scene.control.Alert;
+import javafx.scene.control.Alert.AlertType;
 
 public class JournalPage{
     private User user;
 
     public JournalPage(User user) {
-        new JFXPanel();
+        new JFXPanel(); // Initializes the toolkit
+        Platform.setImplicitExit(false); // <--- ADD THIS LINE
         this.user = user;
     }
     
@@ -38,7 +41,7 @@ public class JournalPage{
 
         //prompt user
         System.out.print("\nSelect a date to view journal, or create a new journal for today: \n>");
-        try {
+         try {
             int choice = sc.nextInt();
             if (choice == 0) return; // Returns to Welcome/Main Page
 
@@ -106,12 +109,21 @@ public class JournalPage{
     }
 
     public void viewJournal(LocalDate date) {
-        Platform.runLater(() -> {
-            try {
-                String filePath = directoryPath() + "/" + date + ".txt";
-                String content = Files.readString(Path.of(filePath));
+    // Run file reading off-thread
+    new Thread(() -> {
+        try {
+            Path path = Path.of(directoryPath(), date.toString() + ".txt");
+            if (!Files.exists(path)) {
+                showError("File not found for: " + date);
+                return;
+            }
+            String content = Files.readString(path);
 
+            Platform.runLater(() -> {
                 Stage stage = new Stage();
+                // Ensure the window stays on top of the console if possible
+                stage.setAlwaysOnTop(true); 
+                
                 TextArea textArea = new TextArea(content);
                 textArea.setEditable(false);
                 textArea.setWrapText(true);
@@ -120,14 +132,25 @@ public class JournalPage{
                 closeBtn.setOnAction(e -> stage.close());
 
                 VBox layout = new VBox(10, textArea, closeBtn);
+                layout.setPadding(new javafx.geometry.Insets(15));
+                
                 stage.setScene(new Scene(layout, 400, 300));
                 stage.setTitle("View: " + date);
                 stage.show();
-            } catch (IOException e) {
-                System.out.println("Error reading file.");
-            }
-        });
-    }
+            });
+        } catch (IOException e) {
+            showError("Error reading journal: " + e.getMessage());
+        }
+    }).start();
+}
+
+// Helper to show errors on the UI thread
+private void showError(String message) {
+    Platform.runLater(() -> {
+        Alert alert = new Alert(Alert.AlertType.ERROR, message);
+        alert.showAndWait();
+    });
+}
 
 
     public void editJournal(LocalDate date) {
@@ -187,7 +210,7 @@ public class JournalPage{
         return directoryPath;
     } 
 
-    public void deleteJournal(LocalDate date) {
+     public void deleteJournal(LocalDate date) {
         String filePath = directoryPath() + "/" + date + ".txt";
         File file = new File(filePath);
         if (file.delete()) {
