@@ -1,8 +1,6 @@
 import java.io.*;
 import java.time.LocalDate;
 import java.util.*;
-<<<<<<< HEAD
-=======
 //imports for javaFX
 import javafx.application.Platform;
 import javafx.embed.swing.JFXPanel;
@@ -13,12 +11,12 @@ import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 import java.nio.file.Files;
 import java.nio.file.Path;
->>>>>>> fe9675e65eaaa88378afd5b7bdaa4b5878dbfce8
 
 public class JournalPage{
     private User user;
 
     public JournalPage(User user) {
+        new JFXPanel();
         this.user = user;
     }
     
@@ -27,13 +25,8 @@ public class JournalPage{
         //get date today
         LocalDate today = LocalDate.now();
 
-<<<<<<< HEAD
-        //calculate and display dates from 4 days ago up to and including today
-        System.out.println("=== Journal Dates ===");
-=======
         //calculate and diplay dates from 4 days ago up to and including today
         System.out.println("\n=== Journal Dates ===");
->>>>>>> fe9675e65eaaa88378afd5b7bdaa4b5878dbfce8
         for(int i=4 , j=1 ; i>=0 ; i-- , j++){
             LocalDate dateToShow = today.minusDays(i);
             System.out.print(j + "." + dateToShow);
@@ -60,14 +53,6 @@ public class JournalPage{
             System.out.println("Please enter a valid number.");
             displayDates();
         }
-    }
-    
-    //helper method to check if a file exists for that date
-    public boolean doesJournalExist(LocalDate date){
-        String username = user.getDisplayName();
-        String path = "user_journal/" + username + "/" + date + ".txt";
-        File file = new File(path);
-        return file.exists();
     }
     
     public void showDateActions(LocalDate chosenDate) {
@@ -121,46 +106,32 @@ public class JournalPage{
     }
 
     public void viewJournal(LocalDate date) {
-        try{
-            String directoryPath = directoryPath();
-            
-            String filePath = directoryPath + "/" + date + ".txt";
-            Path path = Path.of(filePath);
+        Platform.runLater(() -> {
+            try {
+                String filePath = directoryPath() + "/" + date + ".txt";
+                String content = Files.readString(Path.of(filePath));
 
-            String content = Files.readString(path);
+                Stage stage = new Stage();
+                TextArea textArea = new TextArea(content);
+                textArea.setEditable(false);
+                textArea.setWrapText(true);
 
-            Stage stage = new Stage();
-            TextArea textArea = new TextArea(content);
+                Button closeBtn = new Button("Close");
+                closeBtn.setOnAction(e -> stage.close());
 
-            textArea.setEditable(false);
-            textArea.setPrefHeight(400);
-            textArea.setWrapText(true);
-            
-            Button saveBtn = new Button("Close");
-            
-            saveBtn.setOnAction(e -> {
-                try {
-                    stage.close();
-                    showDateActions(date);
-                } catch (IOException ex) {
-                    System.out.println("Error saving: " + ex.getMessage());
-                }
-            });
-
-            VBox layout = new VBox(10, textArea, saveBtn);
-            stage.setScene(new Scene(layout, 500, 450));
-            stage.setTitle("Viewing Journal: " + date);
-            stage.show();
-        
-
-        } catch (IOException e) {
-            System.out.println("Could not read file: " + e.getMessage());
-        }
+                VBox layout = new VBox(10, textArea, closeBtn);
+                stage.setScene(new Scene(layout, 400, 300));
+                stage.setTitle("View: " + date);
+                stage.show();
+            } catch (IOException e) {
+                System.out.println("Error reading file.");
+            }
+        });
     }
 
 
     public void editJournal(LocalDate date) {
-        new JFXPanel();
+        
         
         Platform.runLater(() ->{
         try {
@@ -185,7 +156,6 @@ public class JournalPage{
                     Files.writeString(path, textArea.getText());
                     System.out.println("File updated successfully!");
                     stage.close();
-                    showDateActions(date);
                 } catch (IOException ex) {
                     System.out.println("Error saving: " + ex.getMessage());
                 }
@@ -227,9 +197,8 @@ public class JournalPage{
         }
     }
 
-    // --- HELPER METHODS ---
-
     public boolean doesJournalExist(LocalDate date) {
         return new File(directoryPath() + "/" + date + ".txt").exists();
     }
+
 }
