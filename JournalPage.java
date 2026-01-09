@@ -1,18 +1,6 @@
 import java.io.*;
 import java.time.LocalDate;
 import java.util.*;
-//imports for javaFX
-import javafx.application.Platform;
-import javafx.embed.swing.JFXPanel;
-import javafx.scene.Scene;
-import javafx.scene.control.Button;
-import javafx.scene.control.TextArea;
-import javafx.scene.layout.VBox;
-import javafx.stage.Stage;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import javafx.scene.control.Alert;
-import javafx.scene.control.Alert.AlertType;
 
 public class JournalPage{
     private User user;
@@ -28,7 +16,7 @@ public class JournalPage{
         //get date today
         LocalDate today = LocalDate.now();
 
-        //calculate and diplay dates from 4 days ago up to and including today
+        //calculate and display dates from 4 days ago up to and including today
         System.out.println("\n=== Journal Dates ===");
         for(int i=4 , j=1 ; i>=0 ; i-- , j++){
             LocalDate dateToShow = today.minusDays(i);
@@ -41,7 +29,7 @@ public class JournalPage{
 
         //prompt user
         System.out.print("\nSelect a date to view journal, or create a new journal for today: \n>");
-         try {
+        try {
             int choice = sc.nextInt();
             if (choice == 0) return; // Returns to Welcome/Main Page
 
@@ -108,94 +96,54 @@ public class JournalPage{
         }
     }
 
+    //ref bliali
     public void viewJournal(LocalDate date) {
-    // Run file reading off-thread
-    new Thread(() -> {
+        String filePath = directoryPath() + "/" + date + ".txt";
         try {
-            Path path = Path.of(directoryPath(), date.toString() + ".txt");
-            if (!Files.exists(path)) {
-                showError("File not found for: " + date);
-                return;
-            }
-            String content = Files.readString(path);
-
-            Platform.runLater(() -> {
-                Stage stage = new Stage();
-                // Ensure the window stays on top of the console if possible
-                stage.setAlwaysOnTop(true); 
-                
-                TextArea textArea = new TextArea(content);
-                textArea.setEditable(false);
-                textArea.setWrapText(true);
-
-                Button closeBtn = new Button("Close");
-                closeBtn.setOnAction(e -> stage.close());
-
-                VBox layout = new VBox(10, textArea, closeBtn);
-                layout.setPadding(new javafx.geometry.Insets(15));
-                
-                stage.setScene(new Scene(layout, 400, 300));
-                stage.setTitle("View: " + date);
-                stage.show();
-            });
+            String content = Files.readString(Path.of(filePath));
+            System.out.println("\n----------------------------------------");
+            System.out.println("JOURNAL ENTRY - " + date);
+            System.out.println("----------------------------------------");
+            System.out.println(content);
+            System.out.println("----------------------------------------");
+            System.out.println("Press Enter to go back...");
+            new Scanner(System.in).nextLine();
         } catch (IOException e) {
-            showError("Error reading journal: " + e.getMessage());
+            System.out.println("Error reading journal: " + e.getMessage());
         }
-    }).start();
-}
-
-// Helper to show errors on the UI thread
-private void showError(String message) {
-    Platform.runLater(() -> {
-        Alert alert = new Alert(Alert.AlertType.ERROR, message);
-        alert.showAndWait();
-    });
-}
-
-
-    public void editJournal(LocalDate date) {
-        
-        
-        Platform.runLater(() ->{
-        try {
-
-            // Get the directory path and ensure it exists
-            String directoryPath = directoryPath();
-            String filePath = directoryPath + "/" + date + ".txt";
-            Path path = Path.of(filePath);
-
-            String content = Files.readString(path);
-
-            Stage stage = new Stage();
-            TextArea textArea = new TextArea(content);
-
-            textArea.setPrefHeight(400);
-            textArea.setWrapText(true);
-            
-            Button saveBtn = new Button("Save and Exit");
-            
-            saveBtn.setOnAction(e -> {
-                try {
-                    Files.writeString(path, textArea.getText());
-                    System.out.println("File updated successfully!");
-                    stage.close();
-                } catch (IOException ex) {
-                    System.out.println("Error saving: " + ex.getMessage());
-                }
-            });
-
-            VBox layout = new VBox(10, textArea, saveBtn);
-            stage.setScene(new Scene(layout, 500, 450));
-            stage.setTitle("Editing Journal: " + date);
-            stage.show();
-
-        
-        } catch (IOException e) {
-            System.out.println("Error editing journal: " + e.getMessage());
-        }
-        });
     }
-    
+
+    //ref bliali
+    public void editJournal(LocalDate date) {
+        String filePath = directoryPath() + "/" + date + ".txt";
+        Scanner scan = new Scanner(System.in);
+        StringBuilder contentBuilder = new StringBuilder();
+
+        try {
+            if (doesJournalExist(date)) {
+                System.out.println("\n[Current Content]:\n" + Files.readString(Path.of(filePath)));
+                System.out.println("----------------------------------------");
+            }
+
+            System.out.println("Type your journal entry. (Type 'SAVE' on a new line to finish):");
+            
+            while (true) {
+                String line = scan.nextLine();
+                // Check for exit keyword
+                if (line.equalsIgnoreCase("SAVE")) {
+                    break;
+                }
+                contentBuilder.append(line).append(System.lineSeparator());
+            }
+
+            Files.writeString(Path.of(filePath), contentBuilder.toString());
+            System.out.println("\nJournal saved successfully!");
+            
+        } catch (IOException e) {
+            System.out.println("Error saving journal: " + e.getMessage());
+        }
+    }
+
     public String directoryPath(){
         // Create the directory path: user_journal/[username]/
         String username = user.getDisplayName();
@@ -208,9 +156,9 @@ private void showError(String message) {
         }
         
         return directoryPath;
-    } 
+    }
 
-     public void deleteJournal(LocalDate date) {
+    public void deleteJournal(LocalDate date) {
         String filePath = directoryPath() + "/" + date + ".txt";
         File file = new File(filePath);
         if (file.delete()) {
