@@ -1,6 +1,19 @@
 import java.io.*;
 import java.time.LocalDate;
 import java.util.*;
+<<<<<<< HEAD
+=======
+//imports for javaFX
+import javafx.application.Platform;
+import javafx.embed.swing.JFXPanel;
+import javafx.scene.Scene;
+import javafx.scene.control.Button;
+import javafx.scene.control.TextArea;
+import javafx.scene.layout.VBox;
+import javafx.stage.Stage;
+import java.nio.file.Files;
+import java.nio.file.Path;
+>>>>>>> fe9675e65eaaa88378afd5b7bdaa4b5878dbfce8
 
 public class JournalPage{
     private User user;
@@ -14,8 +27,13 @@ public class JournalPage{
         //get date today
         LocalDate today = LocalDate.now();
 
+<<<<<<< HEAD
         //calculate and display dates from 4 days ago up to and including today
         System.out.println("=== Journal Dates ===");
+=======
+        //calculate and diplay dates from 4 days ago up to and including today
+        System.out.println("\n=== Journal Dates ===");
+>>>>>>> fe9675e65eaaa88378afd5b7bdaa4b5878dbfce8
         for(int i=4 , j=1 ; i>=0 ; i-- , j++){
             LocalDate dateToShow = today.minusDays(i);
             System.out.print(j + "." + dateToShow);
@@ -27,9 +45,21 @@ public class JournalPage{
 
         //prompt user
         System.out.print("\nSelect a date to view journal, or create a new journal for today: \n>");
-        int choice = sc.nextInt();
-        LocalDate chosenDate = today.minusDays(5-choice);
-        showDateActions(chosenDate);
+         try {
+            int choice = sc.nextInt();
+            if (choice == 0) return; // Returns to Welcome/Main Page
+
+            if (choice >= 1 && choice <= 5) {
+                LocalDate chosenDate = today.minusDays(5 - choice);
+                showDateActions(chosenDate);
+            } else {
+                System.out.println("Invalid choice. Try again.");
+                displayDates();
+            }
+        } catch (InputMismatchException e) {
+            System.out.println("Please enter a valid number.");
+            displayDates();
+        }
     }
     
     //helper method to check if a file exists for that date
@@ -40,28 +70,38 @@ public class JournalPage{
         return file.exists();
     }
     
-    public void showDateActions(LocalDate chosenDate){
+    public void showDateActions(LocalDate chosenDate) {
         Scanner sc = new Scanner(System.in);
+        boolean exists = doesJournalExist(chosenDate);
 
-        if (doesJournalExist(chosenDate)){
-            //if a journal exists(true), user can VIEW or EDIT
-            System.out.println("\nJournal found for " + chosenDate);
+        System.out.println("\nDate selected: " + chosenDate);
+        if (exists) {
             System.out.println("1. View Entry");
-            System.out.println("2. Edit Entry");
-            System.out.print("Choice: ");
-            int choice = sc.nextInt();
-        
-            if (choice == 1) viewJournal(chosenDate);
-            else if (choice == 2) editJournal(chosenDate);
-        }else{
-            //if a journal doesn't exist(false), user can only CREATE
-            System.out.println("\nNo journal found for " + chosenDate);
+            System.out.println("2. Edit Entry (Overwrite)");
+            System.out.println("3. Delete Entry");
+            System.out.println("0. Back");
+        } else {
             System.out.println("1. Create New Entry");
-            System.out.print("Choice: ");
-            int choice = sc.nextInt();
-        
-            if (choice == 1) createJournal(chosenDate);
+            System.out.println("0. Back");
         }
+        
+        System.out.print("Choice: ");
+        int choice = sc.nextInt();
+
+        if (choice == 1) {
+            if (exists) viewJournal(chosenDate);
+            else createJournal(chosenDate);
+        } else if (choice == 2 && exists) {
+            editJournal(chosenDate);
+        } else if (choice == 3 && exists) {
+            deleteJournal(chosenDate);
+        } else {
+            displayDates();
+            return;
+        }
+
+        // Return to the date list after action is finished
+        displayDates();
     }
 
     public void createJournal(LocalDate date) {
@@ -81,23 +121,86 @@ public class JournalPage{
     }
 
     public void viewJournal(LocalDate date) {
-    }
-
-    public void editJournal(LocalDate date) {
-        try {
-            Scanner scan = new Scanner(System.in);
-            // Get the directory path and ensure it exists
+        try{
             String directoryPath = directoryPath();
             
             String filePath = directoryPath + "/" + date + ".txt";
-            PrintWriter writer = new PrintWriter(new FileWriter(filePath),true);
-            String input = scan.nextLine();
-            writer.println(input);
-            scan.close();
-            writer.close();
+            Path path = Path.of(filePath);
+
+            String content = Files.readString(path);
+
+            Stage stage = new Stage();
+            TextArea textArea = new TextArea(content);
+
+            textArea.setEditable(false);
+            textArea.setPrefHeight(400);
+            textArea.setWrapText(true);
+            
+            Button saveBtn = new Button("Close");
+            
+            saveBtn.setOnAction(e -> {
+                try {
+                    stage.close();
+                    showDateActions(date);
+                } catch (IOException ex) {
+                    System.out.println("Error saving: " + ex.getMessage());
+                }
+            });
+
+            VBox layout = new VBox(10, textArea, saveBtn);
+            stage.setScene(new Scene(layout, 500, 450));
+            stage.setTitle("Viewing Journal: " + date);
+            stage.show();
+        
+
+        } catch (IOException e) {
+            System.out.println("Could not read file: " + e.getMessage());
+        }
+    }
+
+
+    public void editJournal(LocalDate date) {
+        new JFXPanel();
+        
+        Platform.runLater(() ->{
+        try {
+
+            // Get the directory path and ensure it exists
+            String directoryPath = directoryPath();
+            String filePath = directoryPath + "/" + date + ".txt";
+            Path path = Path.of(filePath);
+
+            String content = Files.readString(path);
+
+            Stage stage = new Stage();
+            TextArea textArea = new TextArea(content);
+
+            textArea.setPrefHeight(400);
+            textArea.setWrapText(true);
+            
+            Button saveBtn = new Button("Save and Exit");
+            
+            saveBtn.setOnAction(e -> {
+                try {
+                    Files.writeString(path, textArea.getText());
+                    System.out.println("File updated successfully!");
+                    stage.close();
+                    showDateActions(date);
+                } catch (IOException ex) {
+                    System.out.println("Error saving: " + ex.getMessage());
+                }
+            });
+
+            VBox layout = new VBox(10, textArea, saveBtn);
+            stage.setScene(new Scene(layout, 500, 450));
+            stage.setTitle("Editing Journal: " + date);
+            stage.show();
+
+        
         } catch (IOException e) {
             System.out.println("Error editing journal: " + e.getMessage());
         }
+        });
     }
     
     public String directoryPath(){
@@ -112,5 +215,21 @@ public class JournalPage{
         }
         
         return directoryPath;
+    } 
+
+     public void deleteJournal(LocalDate date) {
+        String filePath = directoryPath() + "/" + date + ".txt";
+        File file = new File(filePath);
+        if (file.delete()) {
+            System.out.println("Journal deleted successfully.");
+        } else {
+            System.out.println("Failed to delete journal.");
+        }
+    }
+
+    // --- HELPER METHODS ---
+
+    public boolean doesJournalExist(LocalDate date) {
+        return new File(directoryPath() + "/" + date + ".txt").exists();
     }
 }
