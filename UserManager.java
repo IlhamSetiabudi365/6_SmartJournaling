@@ -1,77 +1,70 @@
-import java.io.*;
-import java.util.*;
+import java.sql.*;
+import java.util.ArrayList;
 
-// Manages user login and registration
 public class UserManager {
 
-    private static final String FILE_NAME = "UserData.txt";
-
-    // Ensure the user data file exists
-    private static void ensureFileExists() {
-        File file = new File(FILE_NAME);
-        try {
-            if (file.createNewFile()) {
-                System.out.println("UserData.txt created.");
+    // LOGIN: Ask the Database if this user exists
+    public static User login(String email, String rawPassword) {
+        // SQL Query: Find user with matching email and password
+        String query = "SELECT * FROM users WHERE email = ? AND password = ?";
+        
+        try (Connection conn = DBConnection.getConnection(); PreparedStatement stmt = conn.prepareStatement(query)) {
+            
+            if (conn == null) {
+                System.out.println("Error: Database connection failed.");
+                return null;
             }
-        } catch (IOException e) {
-            System.out.println("Error ensuring UserData.txt exists: " + e.getMessage());
-        }
-    }
 
-    // Load users from the data file
-    public static ArrayList<User> loadUsers() {
-        ArrayList<User> users = new ArrayList<>();
+            // 1. Encrypt the typed password (so it matches the DB)
+            String encryptedPass = SecurityUtility.encrypt(rawPassword);
 
-        try (Scanner scanner = new Scanner(new File(FILE_NAME))) {
+            // 2. Fill in the '?' placeholders safely
+            stmt.setString(1, email);
+            stmt.setString(2, encryptedPass);
 
-            while (scanner.hasNextLine()) {
-                String email = scanner.nextLine().trim();
-                if(email.isEmpty()) continue;
-                if (!scanner.hasNextLine()) break;
-                String displayName = scanner.nextLine().trim();
-                if (!scanner.hasNextLine()) break;
-                String password = scanner.nextLine().trim();
+            // 3. Run the query
+            ResultSet rs = stmt.executeQuery();
 
-                users.add(new User(email, displayName, password));
+            if (rs.next()) {
+                // SUCCESS: User found!
+                String foundName = rs.getString("display_name");
+                String foundEmail = rs.getString("email");
+                String foundPass = rs.getString("password");
+                return new User(foundEmail, foundName, foundPass);
             }
-        } catch (IOException e) {
-            System.out.println("Error loading users: " + e.getMessage());
-        }
-        return users;
-    }
 
-    // Authenticate user login
-    public static User login(String email, String password) {
-        ArrayList<User> users = loadUsers();
-
-        for (User user : users) {
-            if (user.getEmail().equals(email) && user.getPassword().equals(SecurityUtility.encrypt(password))) {
-                return user;
-            }
+        } catch (SQLException e) {
+            System.out.println("Login Error: " + e.getMessage());
         }
         return null;
     }
 
-    // Register a new user
+    // REGISTER: Send new user to the Database
     public static boolean register(User newUser) {
-        ensureFileExists();
-        ArrayList<User> users = loadUsers();
+        String query = "INSERT INTO users (email, display_name, password) VALUES (?, ?, ?)";
 
-        for (User user : users) {
-            if (user.getEmail().equals(newUser.getEmail())) {
-                return false; // Email already in use
-            }
-        }
+        try (Connection conn = DBConnection.getConnection(); PreparedStatement stmt = conn.prepareStatement(query)) {
+            
+            if (conn == null) return false;
 
-        try (PrintWriter writer = new PrintWriter(new FileWriter(FILE_NAME, true))) {
-            String encryptedPassword = SecurityUtility.encrypt(newUser.getPassword());
-            writer.println(newUser.getEmail());
-            writer.println(newUser.getDisplayName());
-            writer.println(encryptedPassword);
-            writer.println(); // Blank line between users
-            return true;
-        } catch (IOException e) {
-            System.out.println("Error registering user: " + e.getMessage());
+            // 1. Encrypt the password before saving
+            String encryptedPass = SecurityUtility.encrypt(newUser.getPassword());
+
+            // 2. Fill in the data
+            stmt.setString(1, newUser.getEmail());
+            stmt.setString(2, newUser.getDisplayName());
+            stmt.setString(3, encryptedPass);
+
+            // 3. Execute the update
+            int rowsAffected = stmt.executeUpdate();
+            return rowsAffected > 0; // If 1 row added, it worked.
+
+        } catch (SQLIntegrityConstraintViolationException e) {
+            // This specific error happens if the Primary Key (Email) already exists
+            System.out.println("Registration Failed: That email is already registered.");
+            return false;
+        } catch (SQLException e) {
+            System.out.println("Register Error: " + e.getMessage());
             return false;
         }
     }
