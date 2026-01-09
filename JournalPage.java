@@ -117,24 +117,36 @@ public class JournalPage{
             String directoryPath = directoryPath();
             
             String filePath = directoryPath + "/" + date + ".txt";
-            Scanner scanner = new Scanner(new File(filePath));
+            Path path = Path.of(filePath);
 
-            while (scanner.hasNextLine()) {
-                String line = scanner.nextLine();
-                System.out.println(line);
-            }scanner.close();
-            System.out.println("\n1. Edit Journal");
-            System.out.println("2. Back to Dates");
-            Scanner sc = new Scanner(System.in);
-            System.out.print("Choice: ");
-            int choice = sc.nextInt();
-            switch(choice){
-                case 1 -> {editJournal(date);}
-                case 2 -> {displayDates();}
-                default -> {System.out.println("invalid input.");}
-            }
-        } catch (FileNotFoundException e) {
-            System.out.println("File not found: " + e.getMessage());
+            String content = Files.readString(path);
+
+            Stage stage = new Stage();
+            TextArea textArea = new TextArea(content);
+
+            textArea.setEditable(false);
+            textArea.setPrefHeight(400);
+            textArea.setWrapText(true);
+            
+            Button saveBtn = new Button("Close");
+            
+            saveBtn.setOnAction(e -> {
+                try {
+                    stage.close();
+                    showDateActions(date);
+                } catch (IOException ex) {
+                    System.out.println("Error saving: " + ex.getMessage());
+                }
+            });
+
+            VBox layout = new VBox(10, textArea, saveBtn);
+            stage.setScene(new Scene(layout, 500, 450));
+            stage.setTitle("Viewing Journal: " + date);
+            stage.show();
+        
+
+        } catch (IOException e) {
+            System.out.println("Could not read file: " + e.getMessage());
         }
     }
 
