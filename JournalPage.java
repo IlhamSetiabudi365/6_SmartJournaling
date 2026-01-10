@@ -1,4 +1,6 @@
 import java.io.*;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.time.LocalDate;
 import java.util.*;
 
@@ -6,8 +8,6 @@ public class JournalPage{
     private User user;
 
     public JournalPage(User user) {
-        new JFXPanel(); // Initializes the toolkit
-        Platform.setImplicitExit(false); // <--- ADD THIS LINE
         this.user = user;
     }
     
@@ -96,7 +96,6 @@ public class JournalPage{
         }
     }
 
-    //ref bliali
     public void viewJournal(LocalDate date) {
         String filePath = directoryPath() + "/" + date + ".txt";
         try {
@@ -113,7 +112,6 @@ public class JournalPage{
         }
     }
 
-    //ref bliali
     public void editJournal(LocalDate date) {
         String filePath = directoryPath() + "/" + date + ".txt";
         Scanner scan = new Scanner(System.in);
