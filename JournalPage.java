@@ -146,8 +146,19 @@ public class JournalPage{
                 contentBuilder.append(line).append(System.lineSeparator());
             }
 
-            Files.writeString(Path.of(filePath), contentBuilder.toString());
-            System.out.println("\nJournal saved successfully!");
+            // --- NEW CODE STARTS HERE ---
+            String fullText = contentBuilder.toString();
+            
+            // 1. Get Sentiment
+            SentimentAnalyzer moodBot = new SentimentAnalyzer();
+            String mood = moodBot.analyze(fullText);
+            
+            // 2. Add Mood Header to the File
+            String finalContent = "MOOD: " + mood + "\n" +"----------------------------------------\n" +fullText;
+            // --- NEW CODE ENDS HERE ---
+
+            Files.writeString(Path.of(filePath), finalContent);
+            System.out.println("\nJournal saved successfully! (Mood detected: " + mood + ")");
             
         } catch (IOException e) {
             System.out.println("Error saving journal: " + e.getMessage());
