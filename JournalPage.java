@@ -71,6 +71,7 @@ public class JournalPage{
             else {
                 createJournal(chosenDate);
                 showDateActions(chosenDate);
+                return;
             }
         } else if (choice == 2 && exists) {
             editJournal(chosenDate);
