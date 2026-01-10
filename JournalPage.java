@@ -17,7 +17,7 @@ public class JournalPage{
         LocalDate today = LocalDate.now();
 
         //calculate and display dates from 6 days ago up to and including today
-        System.out.println("\n=== Journal Dates ===");
+        System.out.println("\n=== Journal Dates ===\n0.Main Menu");
         for(int i=6 , j=1 ; i>=0 ; i-- , j++){
             LocalDate dateToShow = today.minusDays(i);
             System.out.print(j + "." + dateToShow);
@@ -28,7 +28,7 @@ public class JournalPage{
         }
 
         //prompt user
-        System.out.print("\nSelect a date to view journal, or create a new journal for today: \n>");
+        System.out.print("\nSelect a date to view journal, or create a new journal for today: \n>> ");
         try {
             int choice = sc.nextInt();
             if (choice == 0) return; // Returns to Welcome/Main Page
