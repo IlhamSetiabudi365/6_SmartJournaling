@@ -103,11 +103,15 @@ public class JournalPage{
 
     //ref bliali
     public void viewJournal(LocalDate date) {
+        WeatherRecorder recorder = new WeatherRecorder();
+        WeatherResult result = recorder.getWeather("Kuala Lumpur");
         String filePath = directoryPath() + "/" + date + ".txt";
         try {
             String content = Files.readString(Path.of(filePath));
             System.out.println("\n----------------------------------------");
             System.out.println("JOURNAL ENTRY - " + date);
+            System.out.println("Location: " + result.location);
+            System.out.println("Weather: " + result.weather);
             System.out.println("----------------------------------------");
             System.out.println(content);
             System.out.println("----------------------------------------");
