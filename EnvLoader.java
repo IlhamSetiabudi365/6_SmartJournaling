@@ -20,18 +20,18 @@ public class EnvLoader {
             String line;
             
             while ((line = reader.readLine()) != null) {
-                // Skip empty lines or comments
+                // skip empty lines or comments
                 line = line.trim();
                 if (line.isEmpty() || line.startsWith("#")) continue;
 
-                // Split on the first '=' only
+                // split on the first '=' only
                 String[] parts = line.split("=", 2);
 
                 if (parts.length == 2) {
                     String key = parts[0].trim();
                     String value = parts[1].trim();
 
-                    // Optionally, remove quotes from value (if you want to support that)
+                    // optionally, remove quotes from value (if you want to support that)
                     if ((value.startsWith("\"") && value.endsWith("\"")) || (value.startsWith("'") && value.endsWith("'"))) {
                         value = value.substring(1, value.length() - 1);
                     }
