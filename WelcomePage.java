@@ -22,7 +22,7 @@ public class WelcomePage {
     public static void showMainMenu(User user) {
         Scanner sc = new Scanner(System.in);
         boolean running = true;
-        
+
         // Initialize JournalPage with the logged-in user
         JournalPage journal = new JournalPage(user);
 
@@ -38,11 +38,12 @@ public class WelcomePage {
 
             System.out.print(">> ");
             if (!sc.hasNextInt()) {
-                sc.next(); continue;
+                sc.next();
+                continue;
             }
             int choice = sc.nextInt();
-            
-            switch(choice){
+
+            switch (choice) {
                 case 1 -> {
                     // CONNECTED: Open the Journal Page
                     journal.displayDates();
@@ -51,7 +52,8 @@ public class WelcomePage {
                     System.out.println("Feature coming soon...");
                 }
                 case 3 -> {
-                    System.out.println("Feature coming soon...");
+                    SummaryPage summary = new SummaryPage(user);
+                    summary.showSummary();
                 }
                 case 0 -> {
                     System.out.println("Exiting application. Goodbye!");
@@ -64,18 +66,18 @@ public class WelcomePage {
         }
     }
 
-    public static void welcomeMessage(User user){
+    public static void welcomeMessage(User user) {
         LocalTime timeNow = LocalTime.now();
         String greeting = "Hello";
 
-        if (timeNow.isAfter(LocalTime.of(0, 0)) && timeNow.isBefore(LocalTime.of(11, 59))){
+        if (timeNow.isAfter(LocalTime.of(0, 0)) && timeNow.isBefore(LocalTime.of(11, 59))) {
             greeting = "Good Morning";
-        } else if(timeNow.isAfter(LocalTime.of(12, 0)) && timeNow.isBefore(LocalTime.of(16, 59))){
+        } else if (timeNow.isAfter(LocalTime.of(12, 0)) && timeNow.isBefore(LocalTime.of(16, 59))) {
             greeting = "Good Afternoon";
-        } else if (timeNow.isAfter(LocalTime.of(17, 0)) && timeNow.isBefore(LocalTime.of(23, 59))){
+        } else if (timeNow.isAfter(LocalTime.of(17, 0)) && timeNow.isBefore(LocalTime.of(23, 59))) {
             greeting = "Good Evening";
         }
-        
+
         System.out.println("\n" + greeting + ", " + user.getDisplayName() + "!");
     }
 }

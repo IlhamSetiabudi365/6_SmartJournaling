@@ -4,34 +4,35 @@ import java.nio.file.Path;
 import java.time.LocalDate;
 import java.util.*;
 
-public class JournalPage{
+public class JournalPage {
     private User user;
 
     public JournalPage(User user) {
         this.user = user;
     }
-    
+
     public void displayDates() {
         Scanner sc = new Scanner(System.in);
-        //get date today
+        // get date today
         LocalDate today = LocalDate.now();
 
-        //calculate and display dates from 6 days ago up to and including today
+        // calculate and display dates from 6 days ago up to and including today
         System.out.println("\n=== Journal Dates ===\n0.Main Menu");
-        for(int i=6 , j=1 ; i>=0 ; i-- , j++){
+        for (int i = 6, j = 1; i >= 0; i--, j++) {
             LocalDate dateToShow = today.minusDays(i);
             System.out.print(j + "." + dateToShow);
-            if (i==0){
+            if (i == 0) {
                 System.out.print("(today)");
             }
             System.out.println("");
         }
 
-        //prompt user
+        // prompt user
         System.out.print("\nSelect a date to view journal, or create a new journal for today: \n>> ");
         try {
             int choice = sc.nextInt();
-            if (choice == 0) return; // Returns to Welcome/Main Page
+            if (choice == 0)
+                return; // Returns to Welcome/Main Page
 
             if (choice >= 1 && choice <= 7) {
                 LocalDate chosenDate = today.minusDays(7 - choice);
@@ -45,11 +46,11 @@ public class JournalPage{
             displayDates();
         }
     }
-    
+
     public void showDateActions(LocalDate chosenDate) {
         Scanner sc = new Scanner(System.in);
         boolean exists = doesJournalExist(chosenDate);
-    
+
         System.out.println("\nDate selected: " + chosenDate);
         if (exists) {
             System.out.println("1. View Entry");
@@ -60,15 +61,14 @@ public class JournalPage{
             System.out.println("1. Create New Entry");
             System.out.println("0. Back");
         }
-        
+
         System.out.print("Choice: ");
         int choice = sc.nextInt();
 
         if (choice == 1) {
             if (exists) {
                 viewJournal(chosenDate);
-            }
-            else {
+            } else {
                 createJournal(chosenDate);
                 showDateActions(chosenDate);
                 return;
@@ -86,23 +86,58 @@ public class JournalPage{
         displayDates();
     }
 
+    // Inside JournalPage.java
+
     public void createJournal(LocalDate date) {
         try {
-            // Get the directory path and ensure it exists
             String directoryPath = directoryPath();
-            
-            // Create the file with the date as the filename
             String filePath = directoryPath + "/" + date + ".txt";
+
+            System.out.println("\n--- Creating New Journal Entry ---");
+
+            // 1. Get Weather (Live)
+            System.out.print("Fetching weather... ");
+            WeatherRecorder weatherBot = new WeatherRecorder();
+            WeatherResult weatherRes = weatherBot.getWeather("Kuala Lumpur"); // Or your specific city
+            System.out.println("Done.");
+
+            // 2. Get User Input (Journal Content)
+            Scanner scan = new Scanner(System.in);
+            System.out.println("Type your journal entry below. (Type 'SAVE' on a new line to finish):");
+            StringBuilder contentBuilder = new StringBuilder();
+
+            while (true) {
+                String line = scan.nextLine();
+                if (line.equalsIgnoreCase("SAVE"))
+                    break;
+                contentBuilder.append(line).append(System.lineSeparator()); // Use lineSeparator for clean formatting
+            }
+            String fullText = contentBuilder.toString();
+
+            // 3. Get Sentiment (AI Analysis)
+            System.out.print("Analyzing mood... ");
+            SentimentAnalyzer moodBot = new SentimentAnalyzer();
+            String mood = moodBot.analyze(fullText);
+            System.out.println("Done (" + mood + ").");
+
+            // 4. SAVE EVERYTHING TO FILE
             PrintWriter writer = new PrintWriter(new FileWriter(filePath));
             writer.println("Journal created for " + date);
+            writer.println("Location: " + weatherRes.location);
+            writer.println("Weather: " + weatherRes.weather); // Key for Summary Page
+            writer.println("MOOD: " + mood); // Key for Summary Page
+            writer.println("----------------------------------------");
+            writer.println(fullText);
             writer.close();
+
             System.out.println("\nJournal saved successfully to " + filePath);
+
         } catch (IOException e) {
             System.out.println("Error creating journal: " + e.getMessage());
         }
     }
 
-    //ref bliali
+    // ref bliali
     public void viewJournal(LocalDate date) {
         WeatherRecorder recorder = new WeatherRecorder();
         WeatherResult result = recorder.getWeather("Kuala Lumpur");
@@ -123,7 +158,7 @@ public class JournalPage{
         }
     }
 
-    //ref bliali
+    // ref bliali
     public void editJournal(LocalDate date) {
         String filePath = directoryPath() + "/" + date + ".txt";
         Scanner scan = new Scanner(System.in);
@@ -136,7 +171,7 @@ public class JournalPage{
             }
 
             System.out.println("Type your journal entry. (Type 'SAVE' on a new line to finish):");
-            
+
             while (true) {
                 String line = scan.nextLine();
                 // Check for exit keyword
@@ -146,36 +181,25 @@ public class JournalPage{
                 contentBuilder.append(line).append(System.lineSeparator());
             }
 
-            // --- NEW CODE STARTS HERE ---
-            String fullText = contentBuilder.toString();
-            
-            // 1. Get Sentiment
-            SentimentAnalyzer moodBot = new SentimentAnalyzer();
-            String mood = moodBot.analyze(fullText);
-            
-            // 2. Add Mood Header to the File
-            String finalContent = "MOOD: " + mood + "\n" +"----------------------------------------\n" +fullText;
-            // --- NEW CODE ENDS HERE ---
+            Files.writeString(Path.of(filePath), contentBuilder.toString());
+            System.out.println("\nJournal saved successfully!");
 
-            Files.writeString(Path.of(filePath), finalContent);
-            System.out.println("\nJournal saved successfully! (Mood detected: " + mood + ")");
-            
         } catch (IOException e) {
             System.out.println("Error saving journal: " + e.getMessage());
         }
     }
 
-    public String directoryPath(){
+    public String directoryPath() {
         // Create the directory path: user_journal/[username]/
         String username = user.getDisplayName();
         String directoryPath = "user_journal/" + username;
         File directory = new File(directoryPath);
-        
+
         // Create the directory if it doesn't exist
         if (!directory.exists()) {
             directory.mkdirs();
         }
-        
+
         return directoryPath;
     }
 
