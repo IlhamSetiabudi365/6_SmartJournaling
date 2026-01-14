@@ -1,5 +1,7 @@
 import java.util.Scanner;
 
+import javax.xml.transform.Source;
+
 public class UserAccountLogin {
 
     // CHANGED: Returns a 'User' object so WelcomePage knows who logged in
@@ -16,7 +18,7 @@ public class UserAccountLogin {
 
             if (!scanner.hasNextInt()) {
                 System.out.println("Invalid input.");
-                scanner.next(); 
+                scanner.next();
                 continue;
             }
             int choice = scanner.nextInt();
@@ -25,10 +27,10 @@ public class UserAccountLogin {
             // Switch case for user choice
             switch (choice) {
                 // Login process
-                case 1: 
+                case 1:
                     System.out.println("\nLogin selected.");
-                    System.out.print("\nEnter Email Address: ");
-                    String email = scanner.nextLine();
+                    String email = checkEmail();
+
                     System.out.print("\nEnter Password: ");
                     String password = scanner.nextLine();
 
@@ -43,12 +45,11 @@ public class UserAccountLogin {
                     break;
 
                 // Registration process
-                case 2: 
+                case 2:
                     System.out.println("\nRegister selected.");
                     System.out.print("Enter A Display Name: ");
                     String newDisplayName = scanner.nextLine();
-                    System.out.print("\nEnter An Email Address: ");
-                    String newEmail = scanner.nextLine();
+                    String newEmail = checkEmail();
                     System.out.print("\nEnter A Password: ");
                     String newPassword = scanner.nextLine();
 
@@ -61,16 +62,42 @@ public class UserAccountLogin {
                     break;
 
                 // Exit process
-                case 3: 
+                case 3:
                     System.out.println("\nThank you for using Smart Journal!");
                     System.out.println("\nExiting...");
                     System.exit(0);
                     break;
 
-                default: 
+                default:
                     System.out.println("Invalid option. Please try again.");
             }
         }
         return null;
     }
+
+    public static String checkEmail() {
+        String email = "";
+        Scanner scanner = new Scanner(System.in);
+        boolean isValid = false;
+        while (!isValid) {
+            System.out.print("\nEnter Email Address: ");
+            email = scanner.nextLine();
+            try {
+                String[] emailCheck = email.split("@");
+                if (emailCheck.length != 2) {
+                throw new IllegalArgumentException("Must contain exactly one '@' symbol.");
+                }
+
+                String domain = emailCheck[1];
+                if (!domain.contains(".") || domain.startsWith(".") || domain.endsWith(".")) {
+                throw new IllegalArgumentException("Invalid domain");
+                }
+                isValid = true;
+            } catch (IllegalArgumentException e) {
+                System.out.println("Error: " + e.getMessage());
+            }
+        }
+        return (email);
+    }
+
 }

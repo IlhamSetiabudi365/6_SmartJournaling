@@ -32,8 +32,7 @@ public class WelcomePage {
         while (running) {
             System.out.println("\nMenu:");
             System.out.println("1. Journal Page         (press 1)");
-            System.out.println("2. Sentiment Analysis   (press 2)");
-            System.out.println("3. Summary Page         (press 3)");
+            System.out.println("2. Summary Page         (press 2)");
             System.out.println("0. Exit                 (press 0)");
 
             System.out.print(">> ");
@@ -45,19 +44,16 @@ public class WelcomePage {
 
             switch (choice) {
                 case 1 -> {
-                    // CONNECTED: Open the Journal Page
                     journal.displayDates();
                 }
                 case 2 -> {
-                    System.out.println("Feature coming soon...");
-                }
-                case 3 -> {
                     SummaryPage summary = new SummaryPage(user);
                     summary.showSummary();
                 }
                 case 0 -> {
-                    System.out.println("Exiting application. Goodbye!");
+                    System.out.println("\nExiting application... \nGoodbye!");
                     running = false;
+                    return;
                 }
                 default -> {
                     System.out.println("Invalid option.");

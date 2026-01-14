@@ -9,7 +9,7 @@ public class EnvLoader {
      * Loads environment variables from a .env file into a Map.
      * Each line should be in KEY=VALUE format.
      * Lines starting with '#' or empty lines are ignored.
-     * 
+     *
      * @param filePath the path to the .env file
      * @return a Map containing the environment variables as key-value pairs
      */

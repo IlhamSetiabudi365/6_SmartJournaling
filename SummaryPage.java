@@ -30,6 +30,7 @@ public class SummaryPage {
         System.out.println("========================================");
         System.out.println("Press Enter to return to menu...");
         new Scanner(System.in).nextLine();
+        return;
     }
 
     private String getSummaryForDate(LocalDate date) {

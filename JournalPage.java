@@ -17,26 +17,32 @@ public class JournalPage {
         LocalDate today = LocalDate.now();
 
         // calculate and display dates from 6 days ago up to and including today
-        System.out.println("\n=== Journal Dates ===\n0.Main Menu");
+        System.out.println("\n0. Main Menu");// \n=== Journal Dates ===\n
         for (int i = 6, j = 1; i >= 0; i--, j++) {
             LocalDate dateToShow = today.minusDays(i);
-            System.out.print(j + "." + dateToShow);
+            System.out.print(j + ". " + dateToShow);
             if (i == 0) {
                 System.out.print("(today)");
             }
             System.out.println("");
         }
 
+        // option to view older dates
+        System.out.println("\n8. Dates before " + today.minusDays(6));
+
         // prompt user
         System.out.print("\nSelect a date to view journal, or create a new journal for today: \n>> ");
         try {
             int choice = sc.nextInt();
             if (choice == 0)
+
                 return; // Returns to Welcome/Main Page
 
             if (choice >= 1 && choice <= 7) {
                 LocalDate chosenDate = today.minusDays(7 - choice);
                 showDateActions(chosenDate);
+            } else if (choice == 8) {
+                displayOlderDates(today.minusDays(7));
             } else {
                 System.out.println("Invalid choice. Try again.");
                 displayDates();
@@ -137,7 +143,6 @@ public class JournalPage {
         }
     }
 
-    // ref bliali
     public void viewJournal(LocalDate date) {
         WeatherRecorder recorder = new WeatherRecorder();
         WeatherResult result = recorder.getWeather("Kuala Lumpur");
@@ -158,7 +163,6 @@ public class JournalPage {
         }
     }
 
-    // ref bliali
     public void editJournal(LocalDate date) {
         String filePath = directoryPath() + "/" + date + ".txt";
         Scanner scan = new Scanner(System.in);
@@ -180,8 +184,27 @@ public class JournalPage {
                 }
                 contentBuilder.append(line).append(System.lineSeparator());
             }
+            String fullText = contentBuilder.toString();
 
-            Files.writeString(Path.of(filePath), contentBuilder.toString());
+            // 3. Get Sentiment (AI Analysis)
+            System.out.print("Analyzing mood... ");
+            SentimentAnalyzer moodBot = new SentimentAnalyzer();
+            String mood = moodBot.analyze(fullText);
+            System.out.println("Done (" + mood + ").");
+
+            PrintWriter writer = new PrintWriter(new FileWriter(filePath));
+            
+            WeatherRecorder weatherBot = new WeatherRecorder();
+            WeatherResult weatherRes = weatherBot.getWeather("Kuala Lumpur");
+
+            writer.println("Journal edited for " + date);
+            writer.println("Location: " + weatherRes.location);
+            writer.println("Weather: " + weatherRes.weather); // Key for Summary Page
+            writer.println("MOOD: " + mood); // Key for Summary Page
+            writer.println("----------------------------------------");
+            writer.println(fullText);
+            writer.close();
+
             System.out.println("\nJournal saved successfully!");
 
         } catch (IOException e) {
@@ -215,6 +238,44 @@ public class JournalPage {
 
     public boolean doesJournalExist(LocalDate date) {
         return new File(directoryPath() + "/" + date + ".txt").exists();
+    }
+
+    // view older dates
+    public void displayOlderDates(LocalDate date) {
+        Scanner sc = new Scanner(System.in);
+
+        // calculate and display dates from a week ago
+        System.out.println("\n=== Journal Dates ===\n0. Back to Recent Dates");
+        for (int i = 0; i < 7; i++) {
+            LocalDate dateToShow = date.plusDays(i);
+            int menuNum = i + 1;
+            System.out.println(menuNum + ". " + dateToShow);
+        }
+
+        // option to view even older dates
+        System.out.println("\n8. Dates before " + date);
+
+        // prompt user
+        System.out.print("\nSelect a date to view journal, or create a new journal: \n>> ");
+        try {
+            int choice = sc.nextInt();
+            if (choice == 0) {
+                displayDates(); // Returns back to current week (displayDates())
+                return;
+            }
+            if (choice >= 1 && choice <= 7) {
+                LocalDate chosenDate = date.minusDays(choice - 1);
+                showDateActions(chosenDate);
+            } else if (choice == 8) {
+                displayOlderDates(date.minusDays(7));
+            } else {
+                System.out.println("Invalid choice. Try again.");
+                displayOlderDates(date);
+            }
+        } catch (InputMismatchException e) {
+            System.out.println("Please enter a valid number.");
+            displayDates();
+        }
     }
 
 }
