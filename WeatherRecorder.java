@@ -38,7 +38,7 @@ public class WeatherRecorder {
         }
         return "Not Found";
     }
-} 
+}
 
 class WeatherResult {
     public String location;

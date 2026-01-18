@@ -9,7 +9,7 @@ public class API {
 
     /**
      * Sends a GET request to the specified API URL.
-     * 
+     *
      * @param apiURL the URL to send the GET request to
      * @return the response body as a String
      * @throws Exception if the request fails
