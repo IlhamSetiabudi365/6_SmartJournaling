@@ -1,7 +1,5 @@
 import java.util.Scanner;
 
-import javax.xml.transform.Source;
-
 public class UserAccountLogin {
 
     // CHANGED: Returns a 'User' object so WelcomePage knows who logged in
